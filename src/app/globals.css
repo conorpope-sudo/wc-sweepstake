@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* USA '94-inspired palette */
+    --color-black: #000000;
+    --color-blue: #0B4DB3;
+    --color-red: #EF1B1B;
+    --color-ink: #000000;
+    --color-white: #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: Outfit, system-ui, sans-serif;
+    background-color: var(--color-white);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  /* ─── 1–2px line-work ──────────────────────────────────────────────────── */
+  .line-below {
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.2em;
+  }
+  .line-above {
+    border-top: 1px solid currentColor;
+    padding-top: 0.2em;
+  }
+
+  /* ─── USA '94 diagonal shooting lines ──────────────────────────────────── */
+  .diagonal-lines {
+    background-image: repeating-linear-gradient(
+      -18deg,
+      currentColor 0px,
+      currentColor 2px,
+      transparent 2px,
+      transparent 16px
+    );
+  }
+
+  .speed-lines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      currentColor 0 10px,
+      transparent 10px 28px
+    );
+  }
+
+  .football-outline {
+    background:
+      radial-gradient(circle at center, transparent 54%, currentColor 55% 57%, transparent 58%),
+      linear-gradient(72deg, transparent 47%, currentColor 48% 49%, transparent 50%),
+      linear-gradient(-72deg, transparent 47%, currentColor 48% 49%, transparent 50%),
+      linear-gradient(0deg, transparent 47%, currentColor 48% 49%, transparent 50%);
+  }
+}
