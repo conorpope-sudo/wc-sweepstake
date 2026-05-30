@@ -31,13 +31,13 @@ export default function HeroSection({
 
       {/* ─── Content ───────────────────────────────────────────────────────── */}
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-156px)] max-w-[1440px] items-center px-6 py-10 md:px-10 lg:px-14">
-        <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.86fr)] lg:gap-16">
+        <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.86fr)] lg:items-start lg:gap-16">
 
           {/* Left column: entry states (supplied by the page) */}
           <div className="max-w-[680px]">{children}</div>
 
           {/* Right column: large sweepstake mark */}
-          <div className="flex items-center justify-center lg:-translate-y-12 lg:justify-end xl:-translate-y-16">
+          <div className="flex items-center justify-center lg:justify-end">
             <div className="relative w-full max-w-[520px] border-[3px] border-brand-black bg-brand-white p-5 shadow-[14px_14px_0_#000000] md:max-w-[650px]">
               <div aria-hidden className="absolute -right-5 -top-5 h-10 w-32 skew-x-[-20deg] bg-brand-red" />
               <div aria-hidden className="absolute -bottom-6 left-8 h-8 w-44 skew-x-[-20deg] bg-brand-blue" />
