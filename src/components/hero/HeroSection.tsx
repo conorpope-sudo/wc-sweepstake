@@ -37,7 +37,7 @@ export default function HeroSection({
           <div className="max-w-[680px]">{children}</div>
 
           {/* Right column: large sweepstake mark */}
-          <div className="flex items-center justify-center lg:justify-end">
+          <div className="flex items-center justify-center lg:-translate-y-12 lg:justify-end xl:-translate-y-16">
             <div className="relative w-full max-w-[520px] border-[3px] border-brand-black bg-brand-white p-5 shadow-[14px_14px_0_#000000] md:max-w-[650px]">
               <div aria-hidden className="absolute -right-5 -top-5 h-10 w-32 skew-x-[-20deg] bg-brand-red" />
               <div aria-hidden className="absolute -bottom-6 left-8 h-8 w-44 skew-x-[-20deg] bg-brand-blue" />
