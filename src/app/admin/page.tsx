@@ -6,6 +6,7 @@ import {
   DrawForm,
   RefreshFixturesForm,
   SendPendingEmailsForm,
+  SyncPaidForm,
   TestEmailForm,
 } from './AdminForms'
 import { loginAdmin, logoutAdmin } from './actions'
@@ -61,6 +62,9 @@ export default async function AdminPage() {
   const data = await getAdminDashboardData()
   const drawLocked = data.draw.hasRun || data.draw.assignmentCount > 0
   const emailConfigured = Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM)
+  const sheetsConfigured = Boolean(
+    process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
+  )
   const pendingEmails = data.assignments.filter((item) => !item.emailedAt).length
 
   return (
@@ -105,9 +109,10 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-6 lg:grid-cols-2 xl:grid-cols-5">
           <DrawForm disabled={drawLocked} />
           <RefreshFixturesForm />
+          <SyncPaidForm disabled={!sheetsConfigured} />
           <TestEmailForm disabled={!drawLocked || !emailConfigured} />
           <SendPendingEmailsForm
             disabled={!drawLocked || !emailConfigured || pendingEmails === 0}

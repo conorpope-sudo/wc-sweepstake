@@ -5,6 +5,7 @@ import {
   refreshFixturesNow,
   sendPendingEmails,
   sendTestEmail,
+  syncPaidFromSheet,
   triggerDraw,
   type AdminActionState,
 } from './actions'
@@ -111,6 +112,29 @@ export function RefreshFixturesForm() {
       >
         <span className="inline-block skew-x-[12deg]">
           {pending ? 'Refreshing...' : 'Refresh Now'}
+        </span>
+      </button>
+      <StatusMessage state={state} />
+    </form>
+  )
+}
+
+export function SyncPaidForm({ disabled }: { disabled: boolean }) {
+  const [state, action, pending] = useActionState(syncPaidFromSheet, initialState)
+  return (
+    <form action={action} className="border-[3px] border-brand-black bg-brand-white p-5 shadow-[8px_8px_0_#000000]">
+      <h2 className="font-headline text-5xl font-black uppercase leading-none">Sync Paid</h2>
+      <p className="mt-2 text-sm">
+        Reads the Google Sheet and updates the paid column in the admin entry
+        table.
+      </p>
+      <button
+        type="submit"
+        disabled={disabled || pending}
+        className="mt-4 skew-x-[-12deg] border-[3px] border-brand-black bg-brand-blue px-6 py-3 font-headline text-3xl font-black uppercase leading-none text-brand-white shadow-[6px_6px_0_#000000] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="inline-block skew-x-[12deg]">
+          {pending ? 'Syncing...' : 'Sync Paid'}
         </span>
       </button>
       <StatusMessage state={state} />

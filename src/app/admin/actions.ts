@@ -18,6 +18,7 @@ import {
 } from '@/lib/draw'
 import { buildDrawEmail, sendDrawEmail } from '@/lib/drawEmail'
 import { refreshFixtures } from '@/lib/feed/refresh'
+import { syncPaidStatusesFromSheet } from '@/lib/sheets'
 import { entrySchema } from '@/lib/validation'
 
 export type AdminActionState =
@@ -179,6 +180,36 @@ export async function refreshFixturesNow(
         err instanceof Error
           ? err.message
           : 'The fixture refresh failed. Check the server logs.',
+    }
+  }
+}
+
+export async function syncPaidFromSheet(
+  _prev: AdminActionState,
+  _formData: FormData,
+): Promise<AdminActionState> {
+  void _prev
+  void _formData
+
+  await requireAdmin()
+
+  try {
+    const result = await syncPaidStatusesFromSheet()
+    revalidatePath('/admin')
+    return {
+      status: 'success',
+      message: `Synced ${result.matched} payment status${
+        result.matched === 1 ? '' : 'es'
+      } from Google Sheets. Paid: ${result.paid}. Unpaid: ${result.unpaid}.`,
+    }
+  } catch (err) {
+    console.error('syncPaidFromSheet failed:', err)
+    return {
+      status: 'error',
+      message:
+        err instanceof Error
+          ? err.message
+          : 'The Google Sheets payment sync failed.',
     }
   }
 }
