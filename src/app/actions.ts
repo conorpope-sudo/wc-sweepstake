@@ -7,6 +7,7 @@ import {
   CapReachedError,
   DuplicateEmailError,
 } from '@/lib/entries'
+import { sendEntryConfirmationEmail } from '@/lib/entryEmail'
 import { mirrorEntry } from '@/lib/sheets'
 
 export type SubmitState =
@@ -55,6 +56,11 @@ export async function submitEntry(
       email: entry.email,
       paid: entry.paid,
     })
+    try {
+      await sendEntryConfirmationEmail(entry.email, entry.name)
+    } catch (emailErr) {
+      console.error('entry confirmation email failed:', emailErr)
+    }
     revalidatePath('/')
     return { status: 'success', name: entry.name }
   } catch (err) {
