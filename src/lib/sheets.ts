@@ -1,9 +1,9 @@
 import { createSign } from 'crypto'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { entries } from '@/db/schema'
+import { assignments, entries, teams } from '@/db/schema'
 
 export interface MirrorRow {
   name: string
@@ -16,6 +16,10 @@ export interface PaidSyncResult {
   matched: number
   paid: number
   unpaid: number
+}
+
+export interface SheetExportResult {
+  exported: number
 }
 
 interface ServiceAccountKey {
@@ -188,46 +192,60 @@ async function ensureSheetHeader(): Promise<void> {
   )
 }
 
-function rowValues(row: MirrorRow): string[] {
-  return [
-    row.name,
-    row.email,
-    row.paid ? 'TRUE' : 'FALSE',
-    row.drawnTeam ?? '',
-    new Date().toISOString(),
-  ]
+function rowMetadataValues(row: MirrorRow): {
+  identity: string[]
+  extra: string[]
+} {
+  return {
+    identity: [row.name, row.email],
+    extra: [row.drawnTeam ?? '', new Date().toISOString()],
+  }
 }
 
-async function appendSheetRow(row: MirrorRow): Promise<void> {
-  await ensureSheetHeader()
+async function findSheetRowNumberByEmail(email: string): Promise<number | null> {
+  const data = await sheetsRequest<SheetsValueRange>('GET', range('B2:B'))
+  const rows = data.values ?? []
+  const rowIndex = rows.findIndex(
+    (values) => values[0]?.trim().toLowerCase() === email.toLowerCase(),
+  )
+  return rowIndex === -1 ? null : rowIndex + 2
+}
+
+async function nextSheetRowNumber(): Promise<number> {
+  const data = await sheetsRequest<SheetsValueRange>('GET', range('B2:B'))
+  return (data.values?.length ?? 0) + 2
+}
+
+async function writeSheetRowMetadata(
+  rowNumber: number,
+  row: MirrorRow,
+): Promise<void> {
+  const values = rowMetadataValues(row)
   await sheetsRequest(
-    'POST',
-    range('A:E'),
-    { values: [rowValues(row)] },
-    ':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',
+    'PUT',
+    range(`A${rowNumber}:B${rowNumber}`),
+    { values: [values.identity] },
+    '?valueInputOption=USER_ENTERED',
+  )
+  await sheetsRequest(
+    'PUT',
+    range(`D${rowNumber}:E${rowNumber}`),
+    { values: [values.extra] },
+    '?valueInputOption=USER_ENTERED',
+  )
+}
+
+async function upsertSheetRowByEmail(row: MirrorRow): Promise<void> {
+  await ensureSheetHeader()
+  const existingRowNumber = await findSheetRowNumberByEmail(row.email)
+  await writeSheetRowMetadata(
+    existingRowNumber ?? (await nextSheetRowNumber()),
+    row,
   )
 }
 
 async function updateSheetRowByEmail(row: MirrorRow): Promise<void> {
-  await ensureSheetHeader()
-  const data = await sheetsRequest<SheetsValueRange>('GET', range('A2:E'))
-  const rows = data.values ?? []
-  const rowIndex = rows.findIndex(
-    (values) => values[1]?.trim().toLowerCase() === row.email.toLowerCase(),
-  )
-
-  if (rowIndex === -1) {
-    await appendSheetRow(row)
-    return
-  }
-
-  const sheetRowNumber = rowIndex + 2
-  await sheetsRequest(
-    'PUT',
-    range(`A${sheetRowNumber}:E${sheetRowNumber}`),
-    { values: [rowValues(row)] },
-    '?valueInputOption=USER_ENTERED',
-  )
+  await upsertSheetRowByEmail(row)
 }
 
 function paidFromCell(value: string | undefined): boolean {
@@ -241,7 +259,7 @@ function paidFromCell(value: string | undefined): boolean {
 export async function mirrorEntry(row: MirrorRow): Promise<void> {
   try {
     if (sheetsConfigured()) {
-      await appendSheetRow(row)
+      await upsertSheetRowByEmail(row)
     } else {
       console.warn(
         '[sheets] Google Sheets not configured — writing to CSV fallback (data/entries-mirror.csv).',
@@ -305,4 +323,31 @@ export async function syncPaidStatusesFromSheet(): Promise<PaidSyncResult> {
   }
 
   return { matched, paid, unpaid }
+}
+
+export async function exportEntriesToSheet(): Promise<SheetExportResult> {
+  if (!sheetsConfigured()) {
+    throw new Error('Google Sheets is not configured.')
+  }
+
+  const rows = await db
+    .select({
+      entry: entries,
+      teamName: teams.name,
+    })
+    .from(entries)
+    .leftJoin(assignments, eq(assignments.entryId, entries.id))
+    .leftJoin(teams, eq(teams.id, assignments.teamId))
+    .orderBy(asc(entries.createdAt))
+
+  for (const row of rows) {
+    await upsertSheetRowByEmail({
+      name: row.entry.name,
+      email: row.entry.email,
+      paid: row.entry.paid,
+      drawnTeam: row.teamName,
+    })
+  }
+
+  return { exported: rows.length }
 }

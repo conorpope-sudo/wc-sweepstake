@@ -18,7 +18,7 @@ import {
 } from '@/lib/draw'
 import { buildDrawEmail, sendDrawEmail } from '@/lib/drawEmail'
 import { refreshFixtures } from '@/lib/feed/refresh'
-import { syncPaidStatusesFromSheet } from '@/lib/sheets'
+import { exportEntriesToSheet, syncPaidStatusesFromSheet } from '@/lib/sheets'
 import { entrySchema } from '@/lib/validation'
 
 export type AdminActionState =
@@ -210,6 +210,35 @@ export async function syncPaidFromSheet(
         err instanceof Error
           ? err.message
           : 'The Google Sheets payment sync failed.',
+    }
+  }
+}
+
+export async function populateSheetFromEntries(
+  _prev: AdminActionState,
+  _formData: FormData,
+): Promise<AdminActionState> {
+  void _prev
+  void _formData
+
+  await requireAdmin()
+
+  try {
+    const result = await exportEntriesToSheet()
+    return {
+      status: 'success',
+      message: `Populated Google Sheets with ${result.exported} entr${
+        result.exported === 1 ? 'y' : 'ies'
+      } from Neon.`,
+    }
+  } catch (err) {
+    console.error('populateSheetFromEntries failed:', err)
+    return {
+      status: 'error',
+      message:
+        err instanceof Error
+          ? err.message
+          : 'The Google Sheets population failed.',
     }
   }
 }

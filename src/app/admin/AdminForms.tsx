@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import {
+  populateSheetFromEntries,
   refreshFixturesNow,
   sendPendingEmails,
   sendTestEmail,
@@ -135,6 +136,32 @@ export function SyncPaidForm({ disabled }: { disabled: boolean }) {
       >
         <span className="inline-block skew-x-[12deg]">
           {pending ? 'Syncing...' : 'Sync Paid'}
+        </span>
+      </button>
+      <StatusMessage state={state} />
+    </form>
+  )
+}
+
+export function PopulateSheetForm({ disabled }: { disabled: boolean }) {
+  const [state, action, pending] = useActionState(
+    populateSheetFromEntries,
+    initialState,
+  )
+  return (
+    <form action={action} className="border-[3px] border-brand-black bg-brand-white p-5 shadow-[8px_8px_0_#000000]">
+      <h2 className="font-headline text-5xl font-black uppercase leading-none">Populate Sheet</h2>
+      <p className="mt-2 text-sm">
+        Pushes the current Neon entries into Google Sheets without changing the
+        paid checkbox column.
+      </p>
+      <button
+        type="submit"
+        disabled={disabled || pending}
+        className="mt-4 skew-x-[-12deg] border-[3px] border-brand-black bg-brand-blue px-6 py-3 font-headline text-3xl font-black uppercase leading-none text-brand-white shadow-[6px_6px_0_#000000] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="inline-block skew-x-[12deg]">
+          {pending ? 'Populating...' : 'Populate Sheet'}
         </span>
       </button>
       <StatusMessage state={state} />
