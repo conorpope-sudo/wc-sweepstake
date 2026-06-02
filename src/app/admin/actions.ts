@@ -18,6 +18,7 @@ import {
 } from '@/lib/draw'
 import { buildDrawEmail, sendDrawEmail } from '@/lib/drawEmail'
 import { refreshFixtures } from '@/lib/feed/refresh'
+import { sendTodaysMatchdayEmails } from '@/lib/matchdayEmails'
 import { exportEntriesToSheet, syncPaidStatusesFromSheet } from '@/lib/sheets'
 import { entrySchema } from '@/lib/validation'
 
@@ -239,6 +240,33 @@ export async function populateSheetFromEntries(
         err instanceof Error
           ? err.message
           : 'The Google Sheets population failed.',
+    }
+  }
+}
+
+export async function sendMatchdayEmailsNow(
+  _prev: AdminActionState,
+  _formData: FormData,
+): Promise<AdminActionState> {
+  void _prev
+  void _formData
+
+  await requireAdmin()
+
+  try {
+    const result = await sendTodaysMatchdayEmails()
+    return {
+      status: 'success',
+      message: `Matchday email run complete. Sent: ${result.sent}. Already sent: ${result.skippedDuplicate}. Eligible today: ${result.considered}.`,
+    }
+  } catch (err) {
+    console.error('sendMatchdayEmailsNow failed:', err)
+    return {
+      status: 'error',
+      message:
+        err instanceof Error
+          ? err.message
+          : 'The matchday email run failed.',
     }
   }
 }

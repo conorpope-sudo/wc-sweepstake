@@ -4,6 +4,7 @@ import { getAdminDashboardData } from '@/lib/adminData'
 import { ENTRY_CAP } from '@/lib/entries'
 import {
   DrawForm,
+  MatchdayEmailsForm,
   PopulateSheetForm,
   RefreshFixturesForm,
   SendPendingEmailsForm,
@@ -116,6 +117,7 @@ export default async function AdminPage() {
           <PopulateSheetForm disabled={!sheetsConfigured} />
           <SyncPaidForm disabled={!sheetsConfigured} />
           <TestEmailForm disabled={!drawLocked || !emailConfigured} />
+          <MatchdayEmailsForm disabled={!drawLocked || !emailConfigured} />
           <SendPendingEmailsForm
             disabled={!drawLocked || !emailConfigured || pendingEmails === 0}
             pendingCount={pendingEmails}

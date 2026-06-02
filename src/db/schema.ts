@@ -111,3 +111,30 @@ export const drawState = pgTable('draw_state', {
 export type DrawState = typeof drawState.$inferSelect
 
 export const DRAW_STATE_ID = 1
+
+// Matchday email notifications — prevents sending duplicate same-match emails
+// to the same assignment if a cron job is retried or manually triggered.
+export const matchdayEmailNotifications = pgTable(
+  'matchday_email_notifications',
+  {
+    id: serial('id').primaryKey(),
+    assignmentId: integer('assignment_id')
+      .notNull()
+      .references(() => assignments.id),
+    fixtureId: integer('fixture_id')
+      .notNull()
+      .references(() => fixtures.id),
+    sentAt: timestamp('sent_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('matchday_email_notifications_unique').on(
+      t.assignmentId,
+      t.fixtureId,
+    ),
+  ],
+)
+
+export type MatchdayEmailNotification =
+  typeof matchdayEmailNotifications.$inferSelect
