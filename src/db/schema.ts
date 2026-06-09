@@ -138,3 +138,16 @@ export const matchdayEmailNotifications = pgTable(
 
 export type MatchdayEmailNotification =
   typeof matchdayEmailNotifications.$inferSelect
+
+// Politician vs World Cup winner game leaderboard.
+export const gameLeaderboard = pgTable('game_leaderboard', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  score: integer('score').notNull(),
+  total: integer('total').notNull().default(15),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
+export type GameLeaderboardEntry = typeof gameLeaderboard.$inferSelect
