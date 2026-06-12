@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/refresh-fixtures",
+      "schedule": "45 6 * * *"
+    },
+    {
       "path": "/api/cron/matchday-emails",
       "schedule": "0 7 * * *"
     }

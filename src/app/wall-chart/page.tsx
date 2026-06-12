@@ -12,21 +12,37 @@ import { formatUkDate, formatUkTime } from '@/lib/datetime'
 export const dynamic = 'force-dynamic'
 
 function MatchLine({
-  teamA,
-  teamB,
-  kickoffUtc,
+  fixture,
 }: {
-  teamA: string
-  teamB: string
-  kickoffUtc: Date
+  fixture: {
+    teamA: string
+    teamB: string
+    kickoffUtc: Date
+    status: string
+    scoreA: number | null
+    scoreB: number | null
+  }
 }) {
+  const hasScore =
+    fixture.status === 'completed' &&
+    fixture.scoreA !== null &&
+    fixture.scoreB !== null
+
   return (
     <div className="border-t border-brand-black/25 py-2 first:border-t-0">
-      <p className="font-headline text-2xl font-black uppercase leading-none">
-        {teamA} <span className="text-brand-red">v</span> {teamB}
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-headline text-2xl font-black uppercase leading-none">
+          {fixture.teamA} <span className="text-brand-red">v</span>{' '}
+          {fixture.teamB}
+        </p>
+        {hasScore && (
+          <span className="shrink-0 bg-brand-black px-2 py-1 font-mono text-xs font-bold uppercase text-brand-white">
+            FT {fixture.scoreA}-{fixture.scoreB}
+          </span>
+        )}
+      </div>
       <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-widest text-brand-blue">
-        {formatUkDate(kickoffUtc)} / {formatUkTime(kickoffUtc)}
+        {formatUkDate(fixture.kickoffUtc)} / {formatUkTime(fixture.kickoffUtc)}
       </p>
     </div>
   )
@@ -57,9 +73,7 @@ function GroupCard({ group }: { group: WallChartGroup }) {
         {group.fixtures.slice(0, 6).map((fixture) => (
           <MatchLine
             key={fixture.id}
-            teamA={fixture.teamA}
-            teamB={fixture.teamB}
-            kickoffUtc={fixture.kickoffUtc}
+            fixture={fixture}
           />
         ))}
       </div>
@@ -77,9 +91,7 @@ function RoundCard({ round }: { round: WallChartRound }) {
         {round.fixtures.map((fixture) => (
           <MatchLine
             key={fixture.id}
-            teamA={fixture.teamA}
-            teamB={fixture.teamB}
-            kickoffUtc={fixture.kickoffUtc}
+            fixture={fixture}
           />
         ))}
       </div>
