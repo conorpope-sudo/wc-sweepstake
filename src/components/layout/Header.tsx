@@ -7,6 +7,7 @@ import LogoImage from '@/components/logo/LogoImage'
 const navLinks = [
   { href: '/todays-matches', label: "Today's Matches", shortLabel: 'Today' },
   { href: '/wall-chart', label: 'Wall Chart' },
+  { href: '/game', label: 'Quiz' },
   { href: '/rules', label: 'Rules' },
 ]
 
